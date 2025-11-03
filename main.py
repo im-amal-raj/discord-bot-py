@@ -40,13 +40,15 @@ async def on_command_error(ctx, error):
 # Welcome new members with a DM
 @bot.event
 async def on_member_join(member):
-    await member.send(f"Welcome to the server, {member.name}!")
+    try:
+        await member.send(f"Welcome to the server, {member.name}!")
+    except discord.Forbidden:
+        pass
 
 
 # Moderate messages and process commands
 @bot.event
 async def on_message(message):
-    print(message.content)
 
     # Ignore messages from bots
     if message.author.bot:
@@ -57,9 +59,14 @@ async def on_message(message):
 
     # Delete messages containing the word "bot"
     if "bot" in message.content.lower():
-        await message.delete()
-        await message.channel.send(f"{message.author.mention} Don't use that word")
-
+        try:
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} Don't use that word")
+        except discord.Forbidden:
+            pass
+        except Exception:
+            pass
+delete_time = 10  # seconds
 
 # Command: hello
 @bot.command()
@@ -124,7 +131,7 @@ async def setavatar(ctx, file_path: str):
 
 # time to delete messages
 
-delete_time = 10  # seconds
+
 
 
 @bot.command(name="purge", aliases=["clear"])
@@ -151,6 +158,32 @@ async def purge(ctx, amount: int):
             f"An error occured while trying to delete the messages {e}",
             delete_after=delete_time,
         )
+
+
+@bot.command(name="ban")
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason=None):
+
+    if member == ctx.author:
+        await ctx.reply("You cannot ban yourself")
+        return
+    elif member == ctx.guild.me:
+        await ctx.reply("I cannot ban myself")
+        return
+    elif ctx.author.top_role <= member.top_role:
+        await ctx.reply("You cannot ban someone with an equal or higher role.")
+        return
+    try:
+        await member.ban(reason=reason)
+        await ctx.reply(
+            f"User `{member}` has been banned for: {reason or 'No reason provided'}."
+        )
+    except discord.Forbidden:
+        ctx.reply("I dont have permissions to ban that member")
+    except discord.NotFound:
+        ctx.reply("User not found or already banned.")
+    except discord.HTTPException:
+        ctx.reply("An error occurred while trying to ban the user.")
 
 
 # Debug: List registered commands
