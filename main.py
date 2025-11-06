@@ -66,7 +66,10 @@ async def on_message(message):
             pass
         except Exception:
             pass
+
+
 delete_time = 10  # seconds
+
 
 # Command: hello
 @bot.command()
@@ -132,8 +135,6 @@ async def setavatar(ctx, file_path: str):
 # time to delete messages
 
 
-
-
 @bot.command(name="purge", aliases=["clear"])
 @commands.has_permissions(manage_messages=True)
 async def purge(ctx, amount: int):
@@ -176,14 +177,39 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     try:
         await member.ban(reason=reason)
         await ctx.reply(
-            f"User `{member}` has been banned for: {reason or 'No reason provided'}."
+            f"User `{member}` has been banned for: {reason or 'No reason provided.'}."
         )
     except discord.Forbidden:
-        ctx.reply("I dont have permissions to ban that member")
+        ctx.reply("I dont have permissions to ban that member.")
     except discord.NotFound:
         ctx.reply("User not found or already banned.")
     except discord.HTTPException:
         ctx.reply("An error occurred while trying to ban the user.")
+
+
+@bot.command(name="kick")
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):
+
+    if member == ctx.author:
+        await ctx.reply("You cannot kick yourself.")
+        return
+    elif member == ctx.guild.me:
+        await ctx.reply("I cannot ban myself.")
+    elif ctx.author.top_role <= member.top_role:
+        await ctx.reply("You cannot kick someone with an equal or higher role.")
+        return
+    try:
+        await member.kick(reason=reason)
+        await ctx.reply(
+            f"User `{member}` has been kicked for: {reason or 'No reason provided'}"
+        )
+    except discord.Forbidden:
+        ctx.reply("I dont have permission to kick that member.")
+    except discord.NotFound:
+        ctx.reply("User not found or already kicked.")
+    except discord.HTTPException:
+        ctx.reply("An error occurred while trying to kick the user.")
 
 
 # Debug: List registered commands
