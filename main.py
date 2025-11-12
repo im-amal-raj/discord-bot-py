@@ -45,6 +45,16 @@ async def on_member_join(member):
     except discord.Forbidden:
         pass
 
+    role_name = "Member"
+    guild = member.guild
+    role = discord.utils.get(guild.roles, name=role_name)
+    if role:
+        try:
+            await member.add_roles(role)
+            print(f"Assigned {role_name} role to {member.name}")
+        except discord.Forbidden:
+            print(f"Failed to assign {role_name} role to {member.name} due to missing permissions.")
+
 
 # Moderate messages and process commands
 @bot.event
@@ -210,6 +220,8 @@ async def kick(ctx, member: discord.Member, *, reason=None):
         ctx.reply("User not found or already kicked.")
     except discord.HTTPException:
         ctx.reply("An error occurred while trying to kick the user.")
+
+
 
 
 # Debug: List registered commands
