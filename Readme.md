@@ -43,3 +43,5 @@ MIT License
 
 For questions or support, open an issue on GitHub.
 
+Made with ♥ by <a href = "https://github.com/im-amal-raj">im-amal-raj</a>
+
